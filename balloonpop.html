@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Balloon Pop</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    #game-container {
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    #title {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    #scorecard {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+
+    #balloons-container {
+      border: 1px solid #ccc;
+      width: 100%;
+      height: 300px;
+    }
+
+    #start-button {
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    #end-screen {
+      display: none;
+    }
+
+    #play-again {
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+    }
+
+    .balloon {
+      width: 50px;
+      height: 50px;
+      background-color: #ff69b4;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 0;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <h1 id="title">Balloon Pop</h1>
+    <div id="scorecard">
+      <p>Popped: <span id="popped">0</span></p>
+      <p>Missed: <span id="missed">0</span></p>
+    </div>
+    <div id="balloons-container"></div>
+    <button id="start-button">Start</button>
+    <div id="end-screen">
+      <h2 id="final-score">Final Score: <span id="score">0</span></h2>
+      <button id="play-again">Play Again</button>
+    </div>
+  </div>
+  <script>
+    const balloonsContainer = document.getElementById("balloons-container");
+    const startButton = document.getElementById("start-button");
+    const endScreen = document.getElementById("end-screen");
+    const playAgain = document.getElementById("play-again");
+
+    let timer;
+    let score = 0;
+    let missed = 0;
+    let timeLeft = 120;
+
+    function startGame() {
+      // Initialize game elements
+      score = 0;
+      missed = 0;
+      timeLeft = 120;
+      document.getElementById("popped").innerText = score;
+      document.getElementById("missed").innerText = missed;
+
+      // Start the timer
+      timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft < 0) {
+          endGame();
+        }
+      }, 1000);
+
+      // Generate balloons
+      generateBalloon();
+    }
+
+    function endGame() {
+      clearInterval(timer);
+      endScreen.style.display = "block";
+      document.getElementById("score").innerText = score;
+    }
+
+    function generateBalloon() {
+      // Generate a random balloon
+      const balloon = document.createElement("div");
+      balloon.className = "balloon";
+      balloon.style.left = `${Math.random() * (balloonsContainer.offsetWidth - 50)}px`;
+      balloonsContainer.appendChild(balloon);// Add event listener for tapping
+      balloon.addEventListener("click", () => {
+        // Increment score and remove the balloon
+        score += 2;
+        balloon.remove();
+        document.getElementById("popped").innerText = score;
+      });
+
+      // Set the balloon's movement
+      const speed = 1 + (score / 100);
+      const moveBalloon = setInterval(() => {
+        const currentTop = parseInt(balloon.style.top || "0", 10);
+        balloon.style.top = `${currentTop + speed}px`;
+
+        if (currentTop > balloonsContainer.offsetHeight) {
+          missed++;
+          document.getElementById("missed").innerText = missed;
+          balloon.remove();
+          clearInterval(moveBalloon);
+        }
+      }, 10);
+    }
+
+    startButton.addEventListener("click", startGame);
+    playAgain.addEventListener("click", () => {
+      // Reset game state and hide end screen
+      timeLeft = 120;
+      score = 0;
+      missed = 0;
+      endScreen.style.display = "none";
+      startGame();
+    });
+  </script>
+</body>
+</html>
